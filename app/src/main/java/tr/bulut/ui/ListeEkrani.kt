@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -45,7 +47,13 @@ import tr.bulut.veri.Sohbet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListeEkrani(vm: BulutViewModel, sohbetAc: (String) -> Unit, ayarlarAc: () -> Unit) {
+fun ListeEkrani(
+    vm: BulutViewModel,
+    sohbetAc: (String) -> Unit,
+    ayarlarAc: () -> Unit,
+    studyoAc: () -> Unit,
+    galeriAc: () -> Unit,
+) {
     val sohbetler by vm.sohbetler.collectAsStateWithLifecycle()
     val ayarlar by vm.ayarlar.collectAsStateWithLifecycle()
     val anahtarlilar by vm.anahtarlilar.collectAsStateWithLifecycle()
@@ -58,6 +66,8 @@ fun ListeEkrani(vm: BulutViewModel, sohbetAc: (String) -> Unit, ayarlarAc: () ->
             TopAppBar(
                 title = { Text("Bulut") },
                 actions = {
+                    IconButton(onClick = studyoAc) { Icon(Icons.Default.Brush, "Görsel stüdyosu") }
+                    IconButton(onClick = galeriAc) { Icon(Icons.Default.PhotoLibrary, "Galeri") }
                     IconButton(onClick = ayarlarAc) { Icon(Icons.Default.Settings, "Ayarlar") }
                 },
             )

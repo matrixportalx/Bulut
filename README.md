@@ -18,6 +18,21 @@ Hepsi OpenAI uyumlu `chat/completions` uç noktası üzerinden konuşuluyor.
 - API anahtarları Android anahtar deposuyla şifrelenir; sohbetler cihazda JSON
   olarak tutulur ve yedeklemeye girmez.
 
+## Görsel üretimi (Cloudflare Workers AI)
+
+Ücretsiz planda günde 10.000 neuron var. FLUX.1 schnell ile 4 adımlı 1024×1024 görsel
+yaklaşık 58 neuron (günde ~170 görsel); SDXL Lightning, SDXL 1.0 ve DreamShaper 8 LCM
+beta olduğu için neuron harcamıyor.
+
+- **Görsel Stüdyosu**: istem, negatif istem, boyut, adım ve tohum; "İstemi geliştir"
+  tarifi sohbet modeline İngilizce ayrıntılı isteme çevirtir.
+- **Galeri**: her görsel künyesiyle (istem, model, boyut, tohum) cihazda saklanır;
+  paylaşma, Resimler/Bulut'a kaydetme, istemi stüdyoda yeniden kullanma.
+- **Sohbette**: `/görsel <tarif>` doğrudan üretir. Ayarlardaki seçenek açıksa model,
+  istendiğinde yanıtın sonuna `IMAGE_PROMPT:` satırı yazar ve görsel yanıtın altına eklenir.
+
+Kurulum: Ayarlar → Cloudflare Workers AI → hesap kimliği + "Workers AI" şablonlu API belirteci.
+
 ## Derleme
 
 APK yalnızca GitHub Actions'ta üretilir: **Actions → Bulut APK → Run workflow**.

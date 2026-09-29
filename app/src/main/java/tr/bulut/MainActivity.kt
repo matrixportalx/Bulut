@@ -22,6 +22,10 @@ import androidx.navigation.navArgument
 import android.os.Build
 import tr.bulut.ui.AyarlarEkrani
 import tr.bulut.ui.BulutViewModel
+import tr.bulut.ui.CloudflareEkrani
+import tr.bulut.ui.GaleriEkrani
+import tr.bulut.ui.GorselEkrani
+import tr.bulut.ui.StudyoEkrani
 import tr.bulut.ui.ListeEkrani
 import tr.bulut.ui.SaglayiciEkrani
 import tr.bulut.ui.SohbetEkrani
@@ -42,6 +46,8 @@ class MainActivity : ComponentActivity() {
                             vm = vm,
                             sohbetAc = { nav.navigate("sohbet/$it") },
                             ayarlarAc = { nav.navigate("ayarlar") },
+                            studyoAc = { nav.navigate("studyo") },
+                            galeriAc = { nav.navigate("galeri") },
                         )
                     }
                     composable("sohbet/{id}", listOf(navArgument("id") { type = NavType.StringType })) { giris ->
@@ -50,6 +56,7 @@ class MainActivity : ComponentActivity() {
                             sohbetId = giris.arguments?.getString("id").orEmpty(),
                             geri = { nav.popBackStack() },
                             ayarlarAc = { nav.navigate("ayarlar") },
+                            gorselAc = { nav.navigate("gorsel/$it") },
                         )
                     }
                     composable("ayarlar") {
@@ -57,6 +64,39 @@ class MainActivity : ComponentActivity() {
                             vm = vm,
                             geri = { nav.popBackStack() },
                             saglayiciAc = { nav.navigate("saglayici/$it") },
+                            cloudflareAc = { nav.navigate("cloudflare") },
+                        )
+                    }
+                    composable("cloudflare") {
+                        CloudflareEkrani(vm = vm, geri = { nav.popBackStack() })
+                    }
+                    composable(
+                        "studyo?kaynak={kaynak}",
+                        listOf(navArgument("kaynak") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                    ) { giris ->
+                        StudyoEkrani(
+                            vm = vm,
+                            kaynakId = giris.arguments?.getString("kaynak"),
+                            geri = { nav.popBackStack() },
+                            galeriAc = { nav.navigate("galeri") },
+                            gorselAc = { nav.navigate("gorsel/$it") },
+                            cloudflareAc = { nav.navigate("cloudflare") },
+                        )
+                    }
+                    composable("galeri") {
+                        GaleriEkrani(
+                            vm = vm,
+                            geri = { nav.popBackStack() },
+                            gorselAc = { nav.navigate("gorsel/$it") },
+                            studyoAc = { nav.navigate("studyo") },
+                        )
+                    }
+                    composable("gorsel/{id}", listOf(navArgument("id") { type = NavType.StringType })) { giris ->
+                        GorselEkrani(
+                            vm = vm,
+                            gorselId = giris.arguments?.getString("id").orEmpty(),
+                            geri = { nav.popBackStack() },
+                            studyodaAc = { nav.navigate("studyo?kaynak=$it") },
                         )
                     }
                     composable("saglayici/{id}", listOf(navArgument("id") { type = NavType.StringType })) { giris ->

@@ -45,6 +45,7 @@ data class Ayarlar(
     val sicaklik: Float? = null,
     /** İsteğe giden en fazla geçmiş mesaj sayısı; ücretsiz katmanların token sınırı dar. */
     val gecmisSiniri: Int = 30,
+    val gorsel: GorselAyarlari = GorselAyarlari(),
 )
 
 @Serializable
@@ -61,6 +62,10 @@ data class Mesaj(
     val dusunce: String = "",
     val hata: String? = null,
     val model: String = "",
+    /** Sohbette üretilen görselin galeri kimliği. */
+    val gorsel: String = "",
+    /** Üretilecek/üretilmiş görselin tarifi; doluyken [gorsel] boşsa üretim bekliyor ya da düştü. */
+    val gorselIstemi: String = "",
     val zaman: Long = System.currentTimeMillis(),
 )
 

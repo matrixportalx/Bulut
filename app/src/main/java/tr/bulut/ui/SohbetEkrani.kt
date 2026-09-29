@@ -2,11 +2,14 @@ package tr.bulut.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,22 +62,34 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import tr.bulut.ag.GorselKomutu
+import tr.bulut.veri.GorselKaydi
 import tr.bulut.veri.Mesaj
+import java.io.File
 import tr.bulut.veri.Rol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SohbetEkrani(vm: BulutViewModel, sohbetId: String, geri: () -> Unit, ayarlarAc: () -> Unit) {
+fun SohbetEkrani(
+    vm: BulutViewModel,
+    sohbetId: String,
+    geri: () -> Unit,
+    ayarlarAc: () -> Unit,
+    gorselAc: (String) -> Unit,
+) {
     val sohbetler by vm.sohbetler.collectAsStateWithLifecycle()
     val ayarlar by vm.ayarlar.collectAsStateWithLifecycle()
     val anahtarlilar by vm.anahtarlilar.collectAsStateWithLifecycle()
     val uretenler by vm.uretenler.collectAsStateWithLifecycle()
+    val gorseller by vm.gorseller.collectAsStateWithLifecycle()
     val sohbet = sohbetler.firstOrNull { it.id == sohbetId }
     val uretiyor = sohbetId in uretenler
 
@@ -156,6 +171,9 @@ fun SohbetEkrani(vm: BulutViewModel, sohbetId: String, geri: () -> Unit, ayarlar
                             mesaj,
                             akiyor = uretiyor && sonMu,
                             yenile = if (sonMu && !uretiyor) ({ vm.yenidenUret(sohbetId) }) else null,
+                            gorsel = mesaj.gorsel.takeIf { it.isNotEmpty() }?.let { id -> gorseller.firstOrNull { it.id == id } }
+                                ?.let { it to vm.gorselDosyasi(it) },
+                            gorselAc = gorselAc,
                         )
                     }
                 }
@@ -187,7 +205,7 @@ fun SohbetEkrani(vm: BulutViewModel, sohbetId: String, geri: () -> Unit, ayarlar
                     value = girdi,
                     onValueChange = { girdi = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Mesaj") },
+                    placeholder = { Text("Mesaj ya da /görsel …") },
                     maxLines = 6,
                     shape = RoundedCornerShape(24.dp),
                 )
@@ -294,7 +312,13 @@ private fun KullaniciBalonu(mesaj: Mesaj, duzenle: (() -> Unit)?) {
 }
 
 @Composable
-private fun AsistanYaniti(mesaj: Mesaj, akiyor: Boolean, yenile: (() -> Unit)?) {
+private fun AsistanYaniti(
+    mesaj: Mesaj,
+    akiyor: Boolean,
+    yenile: (() -> Unit)?,
+    gorsel: Pair<GorselKaydi, File>?,
+    gorselAc: (String) -> Unit,
+) {
     val pano = LocalClipboardManager.current
     var dusunceAcik by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().animateContentSize()) {
@@ -321,12 +345,16 @@ private fun AsistanYaniti(mesaj: Mesaj, akiyor: Boolean, yenile: (() -> Unit)?) 
                 }
             }
         }
-        if (mesaj.icerik.isNotEmpty()) {
+        val gorunen = if (akiyor) GorselKomutu.gizle(mesaj.icerik) else mesaj.icerik
+        if (gorunen.isNotEmpty()) {
             SelectionContainer {
-                MarkdownMetin(mesaj.icerik, MaterialTheme.colorScheme.onSurface)
+                MarkdownMetin(gorunen, MaterialTheme.colorScheme.onSurface)
             }
-        } else if (akiyor && mesaj.dusunce.isBlank()) {
+        } else if (akiyor && mesaj.dusunce.isBlank() && mesaj.gorselIstemi.isEmpty()) {
             Box(Modifier.padding(8.dp)) { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) }
+        }
+        if (mesaj.gorselIstemi.isNotEmpty()) {
+            SohbetGorseli(mesaj, akiyor, gorsel, gorselAc)
         }
         mesaj.hata?.let { hata ->
             Card(
@@ -360,4 +388,53 @@ private fun AsistanYaniti(mesaj: Mesaj, akiyor: Boolean, yenile: (() -> Unit)?) 
             }
         }
     }
+}
+
+@Composable
+private fun SohbetGorseli(mesaj: Mesaj, akiyor: Boolean, gorsel: Pair<GorselKaydi, File>?, gorselAc: (String) -> Unit) {
+    val sekil = RoundedCornerShape(12.dp)
+    when {
+        gorsel != null -> {
+            val (k, dosya) = gorsel
+            val bmp by rememberGorsel(dosya, 1024)
+            Box(
+                Modifier
+                    .padding(top = 6.dp)
+                    .widthIn(max = 320.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(k.genislik.toFloat() / k.yukseklik)
+                    .clip(sekil)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { gorselAc(k.id) },
+                contentAlignment = Alignment.Center,
+            ) {
+                bmp?.let { Image(it, k.istem, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                    ?: CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+            }
+        }
+        akiyor && mesaj.hata == null -> Row(
+            Modifier
+                .padding(top = 6.dp)
+                .clip(sekil)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+            Text("  Görsel üretiliyor…", style = MaterialTheme.typography.bodyMedium)
+        }
+        mesaj.gorsel.isNotEmpty() -> Text(
+            "Görsel galeriden silinmiş.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
+    }
+    Text(
+        mesaj.gorselIstemi,
+        Modifier.padding(top = 4.dp),
+        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
