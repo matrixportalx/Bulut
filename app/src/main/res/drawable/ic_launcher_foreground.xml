@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Bulut. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,70 C32,70 28,64 28,58.5 C28,52.5 32.5,48 38.5,47.6 C40,40 46.5,35 54,35 C62.5,35 69,41 70,49 C76,49.5 80,54 80,59.5 C80,65.5 75.5,70 69.5,70 Z" />
+    <!-- Konuşma noktaları. -->
+    <path
+        android:fillColor="#3F4E9C"
+        android:pathData="M43,58 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0 M54,58 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0 M65,58 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0" />
+</vector>

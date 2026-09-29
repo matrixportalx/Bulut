@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hazır sağlayıcıların hepsi HTTPS. Düz HTTP yalnızca "Özel sunucu" için
+     açık: yerel ağdaki Ollama / llama-server / LM Studio genelde TLS'siz. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
