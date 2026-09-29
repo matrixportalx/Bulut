@@ -35,7 +35,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AyarlarEkrani(vm: BulutViewModel, geri: () -> Unit, saglayiciAc: (String) -> Unit) {
+fun AyarlarEkrani(vm: BulutViewModel, geri: () -> Unit, saglayiciAc: (String) -> Unit, cloudflareAc: () -> Unit) {
     val ayarlar by vm.ayarlar.collectAsStateWithLifecycle()
     val anahtarlilar by vm.anahtarlilar.collectAsStateWithLifecycle()
 
@@ -71,6 +71,33 @@ fun AyarlarEkrani(vm: BulutViewModel, geri: () -> Unit, saglayiciAc: (String) ->
                         )
                     }
                     if (s.kullanilabilir(anahtarlilar)) {
+                        Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(end = 8.dp))
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                }
+            }
+
+            item {
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                Baslik("Görsel")
+                val hazir = ayarlar.gorsel.hesapId.isNotBlank() && BulutViewModel.CLOUDFLARE in anahtarlilar
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = cloudflareAc)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Cloudflare Workers AI", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (hazir) "Hazır · FLUX.1 schnell, SDXL" else "Hesap bağlanmadı",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (hazir) {
                         Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(end = 8.dp))
                     }
