@@ -1,4 +1,4 @@
-name: Bulut APK
+name: Bulut APK Oluştur
 
 # Elle tetiklenir. Artefakt kotası dolu olduğu için çıktı Release olarak yayımlanır.
 on:
